@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Tuyển Sinh - THCS Thị Trấn Thắng (Editable)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1d3b84', /* Xanh đậm */
+                        secondary: '#de2027', /* Đỏ */
+                        accent: '#ffcc00', /* Vàng */
+                        bglight: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700;1,900&display=swap"
+        rel="stylesheet" crossorigin="anonymous">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous">
+
+    <!-- html2canvas & jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        body {
+            background-color: #e2e8f0;
+            padding: 20px 0;
+        }
+
+        /* Container mô phỏng Poster A4/Màn hình lớn */
+        .poster-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Styles cho list có gạch đầu dòng ngang */
+        .list-dash li::before {
+            content: "- ";
+        }
+
+        /* Style cho các thành phần có thể chỉnh sửa trực tiếp */
+        [contenteditable="true"] {
+            outline: none;
+            transition: all 0.2s ease-in-out;
+            cursor: text;
+        }
+
+        [contenteditable="true"]:hover {
+            background-color: rgba(255, 204, 0, 0.1);
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.3);
+        }
+
+        [contenteditable="true"]:focus {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 2px #ffcc00;
+            border-radius: 4px;
+            color: #000 !important;
+            text-shadow: none;
+        }
+
+        /* Chỉnh sửa khi in ấn */
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+
+            .poster-container {
+                max-width: 100%;
+                box-shadow: none;
+            }
+
+            [contenteditable="true"]:hover,
+            [contenteditable="true"]:focus {
+                background-color: transparent;
+                box-shadow: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Toast thông báo */
+        .export-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1d3b84;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.35s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+        }
+
+        .export-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body class="antialiased text-gray-800 relative">
+
+    <!-- Thông báo hướng dẫn (Ẩn khi in) -->
+    <div
+        class="no-print fixed top-4 left-1/2 transform -translate-x-1/2 bg-white px-6 py-3 rounded-full shadow-lg border-2 border-accent text-sm font-bold text-primary z-50 print:hidden animate-bounce flex items-center gap-2">
+        <i class="fa-solid fa-pen-to-square text-accent"></i> Click vào văn bản bất kỳ để chỉnh sửa trực tiếp
+    </div>
+
+    <!-- Thông báo lưu thành công -->
+    <div id="save-notif"
+        class="no-print fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg hidden z-50 font-bold flex items-center gap-2 transition-opacity duration-300 print:hidden">
+        <i class="fa-solid fa-circle-check"></i> Đã ghi nhớ nội dung! (Kể cả khi tải lại trang)
+    </div>
+
+    <div class="poster-container" id="capture-area">
+        <!-- 1. HEADER SECTION -->
+        <div class="relative pt-8 pb-4 px-8 border-b-[6px] border-primary">
+            <!-- Background Image Placeholder -->
+            <div
+                class="absolute top-0 right-0 w-1/3 h-full bg-gray-100 border-l-[6px] border-white z-0 overflow-hidden rounded-bl-[100px]">
+                <img src="school.jpg" alt="Trường học"
+                    class="w-full h-full object-cover opacity-90">
+                <!-- Lớp phủ gradient để text dễ đọc hơn -->
+                <div class="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent"></div>
+            </div>
+
+            <div class="relative z-10 flex flex-col items-center w-[65%] pr-4">
+                <!-- Logo & Tên Trường -->
+                <div class="flex items-center gap-4 mb-8 w-full draggable-box">
+
+                    <!-- Khung Logo: Cho phép upload và resize -->
+                    <div class="relative shrink-0 print:!resize-none print:!overflow-visible border border-transparent hover:border-gray-300 hover:border-dashed rounded p-1 transition-colors group"
+                        style="resize: both; overflow: hidden; width: 150px; height: 150px; min-width: 60px; min-height: 60px; max-width: 400px; max-height: 400px;">
+
+                        <label id="logo-label" for="logo-upload"
+                            class="cursor-pointer w-full h-full bg-primary text-white rounded-full flex items-center justify-center text-3xl border-4 border-white shadow-md relative overflow-hidden block">
+                            <!-- Icon mặc định (đã ẩn vì dùng logo thật) -->
+                            <i id="logo-icon" class="fa-solid fa-book-open-reader hidden"></i>
+
+                            <!-- Hiệu ứng Hover hiển thị hướng dẫn tải lên -->
+                            <div
+                                class="absolute inset-0 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/60 text-white z-20">
+                                <i class="fa-solid fa-camera text-sm mb-1"></i>
+                                <span class="text-[8px] font-bold uppercase text-center leading-tight">Đổi Logo</span>
+                            </div>
+
+                            <!-- Ảnh Logo mặc định là logo.png -->
+                            <img id="logo-img" src="logo.png" alt="Logo"
+                                class="absolute inset-0 w-full h-full object-contain z-10 bg-white">
+                        </label>
+                        <input type="file" id="logo-upload" accept="image/*" class="hidden"
+                            onchange="handleLogoUpload(event)">
+                    </div>
+
+                    <div class="flex-grow mt-2 text-center">
+                        <h3 class="font-black text-lg md:text-xl text-primary tracking-widest uppercase" contenteditable="true">
+                            Sở GD&ĐT Bắc Ninh</h3>
+                        <h1 class="font-black text-xl md:text-2xl text-primary uppercase leading-[1.1] mt-1 whitespace-nowrap"
+                            contenteditable="true">Trường THPT Hiệp Hòa Số 5</h1>
+                    </div>
+                </div>
+
+                <!-- Tiêu đề Tuyển sinh -->
+                <div class="relative w-fit mt-2 mb-4 flex flex-col items-center gap-3 draggable-box">
+                    <h2 class="font-black text-4xl md:text-[3rem] text-secondary uppercase italic leading-tight drop-shadow-sm w-full"
+                        contenteditable="true" style="text-align-last: justify;">
+                        KẾ HOẠCH TUYỂN SINH
+                    </h2>
+                    <h3 class="font-black text-xl md:text-2xl text-primary uppercase italic drop-shadow-sm whitespace-nowrap"
+                        contenteditable="true">
+                        LỚP 10 TRƯỜNG THPT HIỆP HÒA SỐ 5
+                    </h3>
+
+                    <div class="inline-block bg-accent text-primary font-black text-lg md:text-xl px-6 py-2 shadow-md rounded-[50px] border-2 border-white"
+                        contenteditable="true">
+                        NĂM HỌC 2026 - 2027
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SECTION: 3 CỘT -->
+        <div class="grid grid-cols-3 border-b-[6px] border-primary divide-x-[3px] divide-gray-100">
+            <!-- Cột 1 -->
+            <div class="p-5 flex flex-col items-center text-center bg-white draggable-box">
+                <div
+                    class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-xl mb-3 shadow-md">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h4 class="font-bold text-primary uppercase text-[13px] mb-3" contenteditable="true">1. Chỉ Tiêu Tuyển
+                    Sinh</h4>
+                <div class="text-4xl font-black text-secondary leading-none flex items-baseline gap-1">
+                    <span contenteditable="true">10</span> <span class="text-sm font-bold text-gray-600"
+                        contenteditable="true">Lớp</span>
+                </div>
+                <div class="text-3xl font-black text-primary leading-none mt-2 flex items-baseline gap-1">
+                    <span contenteditable="true">450</span> <span class="text-sm font-bold text-gray-600"
+                        contenteditable="true">Học sinh</span>
+                </div>
+            </div>
+
+            <!-- Cột 2 -->
+            <div class="p-5 bg-bglight draggable-box">
+                <div class="flex items-center gap-3 mb-3">
+                    <div
+                        class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-md shrink-0">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h4 class="font-bold text-primary uppercase text-[13px] leading-tight" contenteditable="true">2. Đối
+                        Tượng, Điều Kiện Dự Tuyển</h4>
+                </div>
+                <ul class="text-[11px] space-y-2 list-disc pl-4 text-gray-700">
+                    <li contenteditable="true">Tốt nghiệp THCS chương trình GD phổ thông hoặc GDTX trong độ tuổi quy định.</li>
+                    <li contenteditable="true">Học sinh tốt nghiệp THCS tại tỉnh Bắc Ninh.</li>
+                    <li contenteditable="true">Học sinh tốt nghiệp THCS tỉnh khác có HKTT tại Bắc Ninh, hoặc có bố/mẹ HKTT tại Bắc Ninh.</li>
+                </ul>
+            </div>
+
+            <!-- Cột 3 -->
+            <div class="p-5 bg-white draggable-box">
+                <div class="flex items-center gap-3 mb-3">
+                    <div
+                        class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-md shrink-0">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <h4 class="font-bold text-primary uppercase text-[13px] leading-tight" contenteditable="true">3.
+                        Phương Thức Tuyển Sinh</h4>
+                </div>
+                <ul class="text-[11px] space-y-2 text-gray-700">
+                    <li><strong class="text-primary block mb-0.5" contenteditable="true">1. Thi tuyển (Nguyện vọng 1):</strong>
+                        <span contenteditable="true">Dành cho thí sinh đăng ký NV1 dự kỳ thi chung của Sở GD&ĐT Bắc Ninh.</span>
+                    </li>
+                    <li><strong class="text-primary block mb-0.5 mt-1" contenteditable="true">2. Xét tuyển (Nguyện vọng 2):</strong>
+                        <span contenteditable="true">Dành cho thí sinh thi NV1 tại THPT khác, nhưng có đăng ký xét NV2 tại THPT Hiệp Hòa số 5.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. SECTION: LỊCH THI & THỜI GIAN -->
+        <div class="flex flex-col border-b-[6px] border-primary relative">
+            <div class="grid grid-cols-12">
+                <!-- Trái: Lịch thi -->
+                <div class="col-span-12 md:col-span-6 p-5 border-r border-gray-200 bg-white flex flex-col draggable-box">
+                    <div
+                        class="bg-primary text-white px-4 py-2 rounded-t-xl flex justify-between items-center shadow-sm">
+                        <h4 class="font-bold text-sm uppercase tracking-wide" contenteditable="true">4. Lịch Thi</h4>
+                        <i class="fa-regular fa-clock text-lg"></i>
+                    </div>
+                    <div
+                        class="border-2 border-primary border-t-0 rounded-b-xl p-4 bg-white flex-grow flex flex-col justify-between">
+                        <ul class="text-[12px] space-y-2 mb-3 font-medium text-gray-700">
+                            <li class="flex items-start gap-2" contenteditable="true"><i
+                                    class="fa-solid fa-file-pen text-primary mt-1" contenteditable="false"></i>Bài kiểm
+                                tra gồm 03 môn: Ngữ văn – Tiếng Anh – Toán</li>
+                            <li class="flex items-start gap-2" contenteditable="true"><i
+                                    class="fa-regular fa-calendar text-secondary mt-1" contenteditable="false"></i>Ngày
+                                thi: <strong class="text-secondary text-[14px]">26, 27/5/2026</strong></li>
+                            <li class="flex items-start gap-2" contenteditable="true"><i
+                                    class="fa-solid fa-location-dot text-primary mt-1" contenteditable="false"></i>Địa
+                                điểm: Tại trường THPT Hiệp Hòa số 5</li>
+                        </ul>
+                        <div>
+                            <table class="w-full text-[11px] text-center border-collapse">
+                                <thead>
+                                    <tr class="bg-bglight">
+                                        <th class="border border-gray-300 py-1.5 px-1" contenteditable="true">Buổi</th>
+                                        <th class="border border-gray-300 py-1.5 px-1" contenteditable="true">Môn</th>
+                                        <th class="border border-gray-300 py-1.5 px-1" contenteditable="true">Thời gian
+                                        </th>
+                                        <th class="border border-gray-300 py-1.5 px-1 bg-blue-50"
+                                            contenteditable="true">Bắt đầu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border border-gray-300 p-1 font-bold text-primary align-middle leading-tight"
+                                            contenteditable="true">Sáng<br><span class="text-[9px] text-gray-500 font-normal">26/5</span></td>
+                                        <td class="border border-gray-300 p-1.5 font-bold" contenteditable="true">Ngữ văn</td>
+                                        <td class="border border-gray-300 p-1.5" contenteditable="true">120 phút</td>
+                                        <td class="border border-gray-300 p-1.5 font-bold text-secondary bg-red-50"
+                                            contenteditable="true">08h00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 p-1 font-bold text-primary align-middle leading-tight"
+                                            contenteditable="true">Chiều<br><span class="text-[9px] text-gray-500 font-normal">26/5</span></td>
+                                        <td class="border border-gray-300 p-1.5 font-bold" contenteditable="true">Tiếng Anh
+                                        </td>
+                                        <td class="border border-gray-300 p-1.5" contenteditable="true">60 phút</td>
+                                        <td class="border border-gray-300 p-1.5 font-bold text-secondary bg-red-50"
+                                            contenteditable="true">14h30</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-gray-300 p-1 font-bold text-primary align-middle leading-tight"
+                                            contenteditable="true">Sáng<br><span class="text-[9px] text-gray-500 font-normal">27/5</span></td>
+                                        <td class="border border-gray-300 p-1.5 font-bold" contenteditable="true">Toán</td>
+                                        <td class="border border-gray-300 p-1.5" contenteditable="true">120 phút</td>
+                                        <td class="border border-gray-300 p-1.5 font-bold text-secondary bg-red-50"
+                                            contenteditable="true">08h00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phải: Thời gian tuyển sinh -->
+                <div class="col-span-12 md:col-span-6 p-5 bg-bglight flex flex-col draggable-box">
+                    <div
+                        class="bg-primary text-white px-4 py-2 rounded-t-xl flex justify-between items-center shadow-sm">
+                        <h4 class="font-bold text-sm uppercase tracking-wide" contenteditable="true">5. Thời Gian Tuyển
+                            Sinh</h4>
+                        <i class="fa-solid fa-calendar-days text-lg"></i>
+                    </div>
+                    <div
+                        class="border-2 border-primary border-t-0 rounded-b-xl p-4 bg-white relative flex-grow flex flex-col justify-between gap-3">
+
+                        <div class="flex items-start gap-3 relative z-10">
+                            <div
+                                class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                                <i class="fa-solid fa-laptop"></i>
+                            </div>
+                            <div>
+                                <span
+                                    class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded border border-green-200 block w-max mb-1"
+                                    contenteditable="true">21/4/2026 đến 17h00 23/4/2026</span>
+                                <p class="text-[11px] text-gray-700 leading-tight" contenteditable="true">Học sinh đăng
+                                    ký thử trực tuyến.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 relative z-10">
+                            <div
+                                class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                                <i class="fa-solid fa-globe"></i>
+                            </div>
+                            <div>
+                                <span
+                                    class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200 block w-max mb-1"
+                                    contenteditable="true">27/4/2026 đến 17h00 ngày 07/5/2026</span>
+                                <p class="text-[11px] text-gray-700 leading-tight" contenteditable="true">Học sinh đăng
+                                    ký trực tuyến chính thức.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 relative z-10">
+                            <div
+                                class="w-8 h-8 rounded-full bg-yellow-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <div>
+                                <span
+                                    class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded border border-yellow-200 block w-max mb-1"
+                                    contenteditable="true">08/5/2026 đến 17h00 12/5/2026</span>
+                                <p class="text-[11px] text-gray-700 leading-tight" contenteditable="true">Thu hồ sơ
+                                    ĐKTS, kiểm tra, rà soát và hoàn thiện dữ liệu.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 relative z-10">
+                            <div
+                                class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                                <i class="fa-solid fa-bullhorn"></i>
+                            </div>
+                            <div>
+                                <span
+                                    class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded border border-red-200 block w-max mb-1"
+                                    contenteditable="true">13/5/2026</span>
+                                <p class="text-[11px] text-gray-700 leading-tight" contenteditable="true">Thông báo
+                                    thông tin ĐKTS tới học sinh.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block Link: Mở rộng sang trái lấp khoảng trắng -->
+            <div class="px-5 pb-5 pt-1 relative overflow-hidden">
+                <!-- Nền ảo nối tiếp 2 màu cột -->
+                <div class="absolute inset-y-0 left-0 w-1/2 bg-white z-0"></div>
+                <div class="absolute inset-y-0 right-0 w-1/2 bg-bglight z-0"></div>
+                <div class="absolute inset-y-0 left-1/2 w-px bg-gray-200 z-0"></div>
+
+                <div
+                    class="bg-primary text-white p-4 rounded-lg flex flex-col md:flex-row items-center justify-center gap-4 shadow-lg border border-blue-800 w-full relative z-10">
+                    <i class="fa-solid fa-globe text-4xl opacity-80 shrink-0"></i>
+                    <div class="text-center md:text-left flex flex-col justify-center">
+                        <p class="text-[11px] font-bold tracking-widest uppercase opacity-70 mb-1 leading-none"
+                            contenteditable="true">Link Tuyển Sinh Trực Tuyến:</p>
+                        <p class="text-accent font-black text-lg md:text-2xl tracking-wide leading-none mt-1"
+                            contenteditable="true">https://dangkyts10.bacninh.edu.vn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SECTION: CHÍNH SÁCH VÀ KỸ NĂNG -->
+        <div class="grid grid-cols-12 bg-bglight">
+            <div class="col-span-12 md:col-span-5 p-5 border-r border-gray-200 draggable-box">
+                <div class="mb-5">
+                    <h4 class="bg-primary text-white inline-block px-4 py-1.5 rounded-lg text-[12px] font-bold uppercase shadow-sm mb-3"
+                        contenteditable="true">6. Hồ Sơ Dự Tuyển</h4>
+                    <ul class="text-[12px] space-y-2 text-gray-700 pl-1">
+                        <li class="flex items-start gap-2" contenteditable="true"><i
+                                class="fa-solid fa-book text-primary mt-1" contenteditable="false"></i> Học bạ THCS (bản chính).</li>
+                        <li class="flex items-start gap-2" contenteditable="true"><i
+                                class="fa-solid fa-file-lines text-primary mt-1" contenteditable="false"></i> Giấy chứng nhận hoàn thành chương trình THCS hoặc bằng TN THCS.</li>
+                        <li class="flex items-start gap-2" contenteditable="true"><i
+                                class="fa-solid fa-id-card text-primary mt-1" contenteditable="false"></i> Bản sao giấy khai sinh hợp lệ.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="bg-primary text-white inline-block px-4 py-1.5 rounded-lg text-[12px] font-bold uppercase shadow-sm mb-3"
+                        contenteditable="true">7. Chế Độ Chính Sách</h4>
+                    <div class="pl-1">
+                        <p class="text-[12px] font-bold text-primary mb-2" contenteditable="true">Thực hiện theo NQ số 98/NQ-HĐND Tỉnh Bắc Ninh:</p>
+                        <ul class="text-[12px] space-y-2 text-gray-700">
+                            <li class="flex items-start gap-2" contenteditable="true">
+                                <i class="fa-solid fa-medal text-accent text-sm mt-0.5 shrink-0"
+                                    contenteditable="false"></i>
+                                <span>Hỗ trợ học phí <strong class="text-secondary">140.000đ/tháng</strong></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-7 p-5 flex flex-col draggable-box">
+                <h4 class="bg-primary text-white w-max px-4 py-1.5 rounded-lg text-[12px] font-bold uppercase shadow-sm mb-4"
+                    contenteditable="true">8. Một số hình ảnh hoạt động của nhà trường</h4>
+
+                <div class="flex-grow grid grid-cols-3 gap-3 mt-1">
+                    <div class="rounded-lg overflow-hidden border-2 border-white shadow-md relative h-36 md:h-44">
+                        <img src="1.jpg" alt="Hoạt động 1" class="w-full h-full object-cover">
+                    </div>
+                    <div class="rounded-lg overflow-hidden border-2 border-white shadow-md relative h-36 md:h-44">
+                        <img src="2.jpg?v=2" alt="Hoạt động 2" class="w-full h-full object-cover">
+                    </div>
+                    <div class="rounded-lg overflow-hidden border-2 border-white shadow-md relative h-36 md:h-44">
+                        <img src="3.jpg?v=2" alt="Hoạt động 3" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. FOOTER -->
+        <div
+            class="bg-primary text-white p-5 flex flex-wrap justify-between items-center gap-4 text-[11px] relative z-10 draggable-box">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-location-dot opacity-70 text-sm"></i>
+                <span class="leading-tight" contenteditable="true">Thôn số 1, xã Hiệp Hòa,<br>tỉnh Bắc Ninh</span>
+            </div>
+
+            <div class="hidden md:block w-px h-6 bg-white/30"></div>
+
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-phone-volume opacity-70 text-sm"></i>
+                <span class="text-accent font-black text-sm tracking-wider" contenteditable="true">0987.118.212</span>
+            </div>
+
+            <div class="hidden md:block w-px h-6 bg-white/30"></div>
+
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-globe opacity-70 text-sm"></i>
+                <span contenteditable="true">https://thpthiephoa5.bacninh.edu.vn/</span>
+            </div>
+
+            <div class="hidden md:block w-px h-6 bg-white/30"></div>
+
+            <div class="flex items-center gap-2">
+                <i class="fa-brands fa-facebook opacity-70 text-sm"></i>
+                <span contenteditable="true">Trường THPT Hiệp Hòa số 5</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Nút chức năng nổi bật -->
+    <div class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 print:hidden no-print">
+        <button onclick="saveDraft()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-xl flex items-center justify-center gap-2 transition transform hover:scale-105 border-2 border-white">
+            <i class="fa-solid fa-floppy-disk text-xl"></i> Lưu Thay Đổi
+        </button>
+        <button id="btn-download-img" onclick="downloadImage()"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full shadow-xl flex items-center justify-center gap-2 transition transform hover:scale-105 border-2 border-white">
+            <i class="fa-solid fa-image text-xl"></i> Tải Ảnh (PNG)
+        </button>
+        <button id="btn-download-pdf" onclick="downloadPDF()"
+            class="bg-[#de2027] hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full shadow-xl flex items-center justify-center gap-2 transition transform hover:scale-105 border-2 border-white">
+            <i class="fa-solid fa-file-pdf text-xl"></i> Lưu PDF
+        </button>
+        <button onclick="clearDraft()"
+            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full shadow-xl flex items-center justify-center gap-2 transition transform hover:scale-105 border-2 border-white text-sm mt-2">
+            <i class="fa-solid fa-rotate-right"></i> Đặt lại mặc định
+        </button>
+    </div>
+
+    <!-- Toast thông báo xuất file -->
+    <div id="export-toast" class="export-toast no-print"></div>
+
+    <!-- Toolbar for Formatting -->
+    <div id="format-toolbar" class="hidden absolute z-50 bg-white shadow-2xl rounded-lg border border-gray-200 p-2 flex flex-wrap gap-2 items-center no-print w-max max-w-[500px]">
+        <!-- Font Family -->
+        <select onchange="document.execCommand('fontName', false, this.value)" class="border border-gray-300 rounded px-1 h-8 text-sm focus:outline-none bg-gray-50 hover:bg-white text-gray-700 font-medium cursor-pointer">
+            <option value="">Font chữ</option>
+            <option value="Arial">Arial</option>
+            <option value="'Times New Roman'">Times New Roman</option>
+            <option value="'Courier New'">Courier</option>
+            <option value="Tahoma">Tahoma</option>
+            <option value="Verdana">Verdana</option>
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Roboto', sans-serif">Roboto</option>
+        </select>
+        
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+        
+        <!-- Text Size -->
+        <select onchange="document.execCommand('fontSize', false, this.value)" class="border border-gray-300 rounded px-1 h-8 text-sm focus:outline-none bg-gray-50 hover:bg-white text-gray-700 font-medium cursor-pointer">
+            <option value="">Cỡ chữ</option>
+            <option value="1">Siêu nhỏ</option>
+            <option value="2">Nhỏ</option>
+            <option value="3">Vừa</option>
+            <option value="4">Hơi lớn</option>
+            <option value="5">Lớn</option>
+            <option value="6">Rất lớn</option>
+            <option value="7">Siêu to</option>
+        </select>
+
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+        <!-- Basic formatting -->
+        <button onclick="document.execCommand('bold', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded font-bold text-gray-800" title="In đậm (Ctrl+B)"><i class="fa-solid fa-bold"></i></button>
+        <button onclick="document.execCommand('italic', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded italic text-gray-800" title="In nghiêng (Ctrl+I)"><i class="fa-solid fa-italic"></i></button>
+        <button onclick="document.execCommand('underline', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded underline text-gray-800" title="Gạch chân (Ctrl+U)"><i class="fa-solid fa-underline"></i></button>
+        <button onclick="document.execCommand('strikeThrough', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded line-through text-gray-800" title="Gạch ngang"><i class="fa-solid fa-strikethrough"></i></button>
+        
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+        <!-- Colors -->
+        <div class="flex items-center gap-1 hover:bg-gray-100 rounded px-1" title="Màu chữ">
+            <i class="fa-solid fa-font text-sm text-gray-700"></i>
+            <input type="color" onchange="document.execCommand('foreColor', false, this.value)" class="w-6 h-8 p-0 border-0 rounded cursor-pointer bg-transparent">
+        </div>
+        <div class="flex items-center gap-1 hover:bg-gray-100 rounded px-1" title="Màu nền chữ">
+            <i class="fa-solid fa-fill-drip text-sm text-gray-700"></i>
+            <input type="color" onchange="document.execCommand('hiliteColor', false, this.value)" class="w-6 h-8 p-0 border-0 rounded cursor-pointer bg-transparent">
+        </div>
+
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+        <!-- Alignments -->
+        <button onclick="document.execCommand('justifyLeft', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-800" title="Căn trái"><i class="fa-solid fa-align-left"></i></button>
+        <button onclick="document.execCommand('justifyCenter', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-800" title="Căn giữa"><i class="fa-solid fa-align-center"></i></button>
+        <button onclick="document.execCommand('justifyRight', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-800" title="Căn phải"><i class="fa-solid fa-align-right"></i></button>
+        <button onclick="document.execCommand('justifyFull', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-800" title="Căn đều 2 bên"><i class="fa-solid fa-align-justify"></i></button>
+
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+        
+        <!-- Lists -->
+        <button onclick="document.execCommand('insertUnorderedList', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-800" title="Danh sách chấm"><i class="fa-solid fa-list-ul"></i></button>
+        <button onclick="document.execCommand('insertOrderedList', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-800" title="Danh sách số"><i class="fa-solid fa-list-ol"></i></button>
+
+        <div class="w-px h-6 bg-gray-300 mx-1"></div>
+
+        <!-- Clear Format -->
+        <button onclick="document.execCommand('removeFormat', false, null)" class="w-8 h-8 flex items-center justify-center hover:bg-red-100 text-red-600 rounded" title="Xóa toàn bộ định dạng"><i class="fa-solid fa-text-slash"></i></button>
+    </div>
+
+    <!-- Script xử lý upload Logo, Tải ảnh và Lưu trữ Local -->
+    <script>
+        // 1. Chức năng Đổi Logo
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('logo-img');
+                    const icon = document.getElementById('logo-icon');
+                    const label = document.getElementById('logo-label');
+
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+
+                    if (icon) icon.classList.add('hidden');
+
+                    if (label) {
+                        label.classList.remove('rounded-full', 'overflow-hidden', 'bg-primary', 'border-4', 'border-white', 'shadow-md');
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // === TOAST THÔNG BÁO ===
+        function showExportToast(msg, duration) {
+            duration = duration || 2800;
+            var t = document.getElementById('export-toast');
+            t.textContent = msg;
+            t.classList.add('visible');
+            setTimeout(function () { t.classList.remove('visible'); }, duration);
+        }
+
+        // === HÀM CHUNG: Capture poster thành canvas ===
+        function capturePoster(scaleFactor) {
+            var container = document.getElementById('capture-area');
+            if (document.activeElement) document.activeElement.blur();
+            var savedScroll = window.scrollY;
+            window.scrollTo(0, 0);
+
+            function getCloneOptions(useForeignObject) {
+                return {
+                    scale: scaleFactor || 3,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    scrollY: -window.scrollY,
+                    imageTimeout: 15000,
+                    foreignObjectRendering: useForeignObject,
+                    onclone: function (clonedDoc) {
+                        var editables = clonedDoc.querySelectorAll('[contenteditable]');
+                        editables.forEach(function (el) {
+                            el.removeAttribute('contenteditable');
+                            el.style.outline = 'none';
+                            el.style.boxShadow = 'none';
+                        });
+                        var noPrints = clonedDoc.querySelectorAll('.no-print');
+                        noPrints.forEach(function (el) { el.style.display = 'none'; });
+                        var fi = clonedDoc.querySelectorAll('input[type="file"]');
+                        fi.forEach(function (el) { el.style.display = 'none'; });
+                        var logoOv = clonedDoc.querySelectorAll('#logo-label > div.absolute');
+                        logoOv.forEach(function (el) { el.style.display = 'none'; });
+                        var lf = clonedDoc.querySelector('#logo-label');
+                        if (lf && lf.parentElement) {
+                            lf.parentElement.style.resize = 'none';
+                            lf.parentElement.style.border = 'none';
+                            
+                            // Đảm bảo html2canvas giữ nguyên kích thước logo đã resize
+                            var liveWrapper = document.querySelector('#logo-label').parentElement;
+                            if (liveWrapper) {
+                                var rect = liveWrapper.getBoundingClientRect();
+                                lf.parentElement.style.width = rect.width + 'px';
+                                lf.parentElement.style.height = rect.height + 'px';
+                            }
+                        }
+                    }
+                };
+            }
+
+            return new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    // Thử foreignObject trước (dùng browser engine → text chính xác)
+                    html2canvas(container, getCloneOptions(true)).then(function (canvas) {
+                        // Kiểm tra canvas có bị tainted không
+                        try {
+                            canvas.toDataURL();
+                            window.scrollTo(0, savedScroll);
+                            resolve(canvas);
+                        } catch (e) {
+                            // Canvas tainted → fallback sang standard rendering
+                            console.warn('foreignObject canvas tainted, fallback...', e);
+                            html2canvas(container, getCloneOptions(false)).then(function (canvas2) {
+                                window.scrollTo(0, savedScroll);
+                                resolve(canvas2);
+                            }).catch(function (err) {
+                                window.scrollTo(0, savedScroll);
+                                reject(err);
+                            });
+                        }
+                    }).catch(function (err) {
+                        // foreignObject failed → fallback
+                        console.warn('foreignObject failed, fallback...', err);
+                        html2canvas(container, getCloneOptions(false)).then(function (canvas2) {
+                            window.scrollTo(0, savedScroll);
+                            resolve(canvas2);
+                        }).catch(function (err2) {
+                            window.scrollTo(0, savedScroll);
+                            reject(err2);
+                        });
+                    });
+                }, 200);
+            });
+        }
+
+        // 2. Chức năng Tải Ảnh (PNG) — Ưu tiên Puppeteer server, fallback html2canvas
+        function downloadImage() {
+            // Tự động lưu bản nháp mới nhất để Puppeteer lấy đúng giao diện hiện tại (ví dụ: kích thước logo vừa kéo thả)
+            saveDraft();
+            
+            var btn = document.getElementById('btn-download-img');
+            var btnOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i> Đang tạo ảnh...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+
+            function restoreBtn() {
+                btn.innerHTML = btnOriginal;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+
+            const draftHtml = document.querySelector('.poster-container').innerHTML;
+            // Thử gọi Puppeteer server trước
+            fetch('/api/capture?format=png', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'text/html' },
+                body: draftHtml
+            })
+                .then(function (resp) {
+                    if (!resp.ok) throw new Error('Server không phản hồi');
+                    return resp.blob();
+                })
+                .then(function (blob) {
+                    var url = URL.createObjectURL(blob);
+                    var link = document.createElement('a');
+                    link.download = 'Poster_TuyenSinh_THPT_HiepHoa5.png';
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    showExportToast('✅ Đã tải ảnh PNG thành công! (Pixel-perfect)');
+                    restoreBtn();
+                })
+                .catch(function () {
+                    // Fallback: dùng html2canvas
+                    console.log('Puppeteer server không chạy, dùng html2canvas...');
+                    capturePoster(3).then(function (canvas) {
+                        var link = document.createElement('a');
+                        link.download = 'Poster_TuyenSinh_THPT_HiepHoa5.png';
+                        link.href = canvas.toDataURL('image/png', 1.0);
+                        link.click();
+                        showExportToast('✅ Đã tải ảnh PNG!');
+                    }).catch(function (err) {
+                        console.error(err);
+                        showExportToast('❌ Lỗi xuất ảnh: ' + err.message);
+                    }).finally(restoreBtn);
+                });
+        }
+
+        // 2b. Chức năng Lưu PDF — Ưu tiên Puppeteer server, fallback html2canvas+jsPDF
+        function downloadPDF() {
+            // Tự động lưu bản nháp mới nhất
+            saveDraft();
+            
+            var btn = document.getElementById('btn-download-pdf');
+            var btnOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i> Đang tạo PDF...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+
+            function restoreBtn() {
+                btn.innerHTML = btnOriginal;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+
+            const draftHtml = document.querySelector('.poster-container').innerHTML;
+            // Thử gọi Puppeteer server trước
+            fetch('/api/capture?format=pdf', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'text/html' },
+                body: draftHtml
+            })
+                .then(function (resp) {
+                    if (!resp.ok) throw new Error('Server không phản hồi');
+                    return resp.blob();
+                })
+                .then(function (blob) {
+                    var url = URL.createObjectURL(blob);
+                    var link = document.createElement('a');
+                    link.download = 'Poster_TuyenSinh_THPT_HiepHoa5.pdf';
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    showExportToast('✅ Đã lưu PDF thành công! (Pixel-perfect)');
+                    restoreBtn();
+                })
+                .catch(function () {
+                    // Fallback: dùng html2canvas + jsPDF
+                    console.log('Puppeteer server không chạy, dùng html2canvas+jsPDF...');
+                    capturePoster(3).then(function (canvas) {
+                        var imgData = canvas.toDataURL('image/jpeg', 0.95);
+                        var imgW = canvas.width;
+                        var imgH = canvas.height;
+                        var pdfW = 210;
+                        var pdfH = (imgH * pdfW) / imgW;
+                        var jsPDF = window.jspdf.jsPDF;
+                        var pdf = new jsPDF({
+                            orientation: pdfH > pdfW ? 'portrait' : 'landscape',
+                            unit: 'mm',
+                            format: [pdfW, pdfH]
+                        });
+                        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH, undefined, 'FAST');
+                        pdf.save('Poster_TuyenSinh_THCS_TTThang.pdf');
+                        showExportToast('✅ Đã lưu PDF!');
+                    }).catch(function (err) {
+                        console.error(err);
+                        showExportToast('❌ Lỗi xuất PDF: ' + err.message);
+                    }).finally(restoreBtn);
+                });
+        }
+
+        // 3. Chức năng Lưu Trữ Nội Dung
+        function saveDraft() {
+            const container = document.querySelector('.poster-container');
+            localStorage.setItem('posterDraft_THPT5_v19', container.innerHTML);
+
+            const notif = document.getElementById('save-notif');
+            notif.classList.remove('hidden');
+            setTimeout(() => { notif.classList.add('hidden'); }, 3000);
+        }
+
+        // 4. Khôi phục nội dung đã lưu khi trang vừa tải
+        function loadDraft() {
+            // Đọc Draft mới
+            const draft = localStorage.getItem('posterDraft_THPT5_v19');
+            // Xóa rác cũ
+            localStorage.removeItem('posterDraft_THCSThang');
+            localStorage.removeItem('posterDraft_THPT5');
+            localStorage.removeItem('posterDraft_THPT5_v3');
+            localStorage.removeItem('posterDraft_THPT5_v4');
+            localStorage.removeItem('posterDraft_THPT5_v5');
+            localStorage.removeItem('posterDraft_THPT5_v16');
+            localStorage.removeItem('posterDraft_THPT5_v17');
+            localStorage.removeItem('posterDraft_THPT5_v18');
+            localStorage.removeItem('posterDraft_THPT5_v7');
+            localStorage.removeItem('posterDraft_THPT5_v8');
+            localStorage.removeItem('posterDraft_THPT5_v9');
+            localStorage.removeItem('posterDraft_THPT5_v10');
+            localStorage.removeItem('posterDraft_THPT5_v11');
+            localStorage.removeItem('posterDraft_THPT5_v12');
+            localStorage.removeItem('posterDraft_THPT5_v13');
+            
+            if (draft) {
+                document.querySelector('.poster-container').innerHTML = draft;
+            }
+        }
+
+        // 5. Xóa bản lưu (Reset)
+        function clearDraft() {
+            if (confirm("Bạn có chắc chắn muốn xóa bản lưu hiện tại và khôi phục về mặc định gốc?")) {
+                localStorage.removeItem('posterDraft_THPT5_v19');
+                location.reload();
+            }
+        }
+
+        // 6. Xử lý toolbar định dạng chữ
+        document.addEventListener('selectionchange', () => {
+            const selection = window.getSelection();
+            const toolbar = document.getElementById('format-toolbar');
+            if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                const range = selection.getRangeAt(0);
+                let container = range.commonAncestorContainer;
+                if (container.nodeType === 3) container = container.parentNode;
+                if (!container.closest('.poster-container')) {
+                    toolbar.classList.add('hidden');
+                    return;
+                }
+                const rect = range.getBoundingClientRect();
+                
+                // Hiển thị trước để lấy chiều cao thực tế của toolbar
+                toolbar.classList.remove('hidden');
+                
+                const tbHeight = toolbar.offsetHeight;
+                let topPos = rect.top + window.scrollY - tbHeight - 10;
+                
+                // Nếu toolbar bị đẩy lên quá màn hình (lên sát mép trên), đưa nó xuống dưới dòng chữ
+                if (topPos < 10) {
+                    topPos = rect.bottom + window.scrollY + 10;
+                }
+                
+                toolbar.style.top = topPos + 'px';
+                toolbar.style.left = (rect.left + window.scrollX) + 'px';
+            } else {
+                toolbar.classList.add('hidden');
+            }
+        });
+
+        // 7. Tính năng Drag & Drop Mọi Khối + Khung Chữ (Kéo ở mép viền)
+        let isDragging = false;
+        let initialX, initialY;
+        let activeBox = null;
+        const EDGE_SIZE = 15; // Vùng viền nhận diện kéo thả (pixel)
+
+        function initDragAndDrop() {
+            document.addEventListener('mousedown', dragStart);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mousemove', drag);
+        }
+
+        // Kiểm tra chuột có nằm ở viền phần tử hay không
+        function isNearEdge(e, element) {
+            const rect = element.getBoundingClientRect();
+            return (
+                e.clientX < rect.left + EDGE_SIZE ||
+                e.clientX > rect.right - EDGE_SIZE ||
+                e.clientY < rect.top + EDGE_SIZE ||
+                e.clientY > rect.bottom - EDGE_SIZE
+            );
+        }
+
+        // Đổi con trỏ chuột khi đưa vào viền khung chữ hoặc khối draggable
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) return;
+            const target = e.target;
+            
+            if (target && target.hasAttribute && target.hasAttribute('contenteditable')) {
+                if (isNearEdge(e, target)) {
+                    target.style.cursor = 'move';
+                    // Hiển thị khung mờ để user biết là có thể kéo
+                    target.style.outline = '1px dashed rgba(0,0,0,0.2)';
+                    target.style.outlineOffset = '2px';
+                } else {
+                    target.style.cursor = 'text';
+                    target.style.outline = 'none';
+                }
+            } else if (target && target.closest) {
+                const box = target.closest('.draggable-box');
+                if (box) {
+                    if (target === box || isNearEdge(e, box)) {
+                        box.style.cursor = 'move';
+                    }
+                }
+            }
+        });
+
+        // Xóa outline khi chuột ra khỏi phần tử
+        document.addEventListener('mouseout', (e) => {
+            if (!isDragging && e.target && e.target.hasAttribute && e.target.hasAttribute('contenteditable')) {
+                e.target.style.outline = 'none';
+            }
+        });
+
+        function dragStart(e) {
+            let target = e.target;
+            
+            // Không kéo khi click vào nút, input, checkbox...
+            if (target.closest('button, input, select')) return;
+
+            // Kiểm tra click vào khung chữ hay khối
+            if (target.hasAttribute && target.hasAttribute('contenteditable')) {
+                if (isNearEdge(e, target)) {
+                    activeBox = target;
+                } else {
+                    return; // Đang click vào giữa chữ để edit, bỏ qua drag
+                }
+            } else {
+                let box = target.closest('.draggable-box');
+                if (box) {
+                    activeBox = box;
+                } else {
+                    return;
+                }
+            }
+            
+            if (activeBox) {
+                // Prevent default text selection when dragging by edge
+                e.preventDefault();
+                
+                // Đảm bảo phần tử có thể di chuyển bằng transform
+                if (window.getComputedStyle(activeBox).position === 'static') {
+                    activeBox.style.position = 'relative'; 
+                }
+
+                const style = window.getComputedStyle(activeBox);
+                const matrix = new DOMMatrixReadOnly(style.transform !== 'none' ? style.transform : 'matrix(1, 0, 0, 1, 0, 0)');
+                const xOffset = matrix.m41;
+                const yOffset = matrix.m42;
+
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+                isDragging = true;
+                
+                activeBox.style.outline = '2px dashed rgba(37, 99, 235, 0.5)'; // Khung màu xanh khi đang kéo
+                activeBox.style.outlineOffset = '4px';
+                activeBox.style.zIndex = '100'; // Nổi lên trên
+            }
+        }
+
+        function dragEnd(e) {
+            if (isDragging && activeBox) {
+                isDragging = false;
+                activeBox.style.outline = 'none';
+                activeBox.style.zIndex = '';
+                activeBox = null;
+                saveDraft(); // Tự động lưu vị trí mới
+            }
+        }
+
+        function drag(e) {
+            if (isDragging && activeBox) {
+                e.preventDefault();
+                const currentX = e.clientX - initialX;
+                const currentY = e.clientY - initialY;
+                activeBox.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDraft();
+            initDragAndDrop();
+        });
+    </script>
+</body>
+
+</html>
