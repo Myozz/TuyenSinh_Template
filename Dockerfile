@@ -4,13 +4,21 @@ FROM ghcr.io/puppeteer/puppeteer:latest
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
+USER root
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 RUN npm install
 
-# Copy source code với quyền của user hiện tại
-COPY --chown=pptruser:pptruser . .
+# Copy source code
+COPY . .
+
+# Đổi quyền sở hữu cho pptruser
+RUN chown -R pptruser:pptruser /usr/src/app
+
+# Trở lại user mặc định của image puppeteer
+USER pptruser
 
 EXPOSE 3000
 
