@@ -150,20 +150,20 @@
         <div class="relative pt-8 pb-4 px-8 border-b-[6px] border-primary">
             <!-- Background Image Placeholder -->
             <div
-                class="absolute top-0 right-0 w-1/3 h-full bg-gray-100 border-l-[6px] border-white z-0 overflow-hidden rounded-bl-[100px]">
+                class="absolute top-0 right-0 w-[45%] h-full bg-gray-100 border-l-[6px] border-white z-0 overflow-hidden rounded-bl-[100px]">
                 <img src="school.jpg" alt="Trường học"
                     class="w-full h-full object-cover opacity-90">
                 <!-- Lớp phủ gradient để text dễ đọc hơn -->
                 <div class="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent"></div>
             </div>
 
-            <div class="relative z-10 flex flex-col items-center w-[65%] pr-4">
+            <div class="relative z-10 flex flex-col items-start w-[55%] pr-4">
                 <!-- Logo & Tên Trường -->
-                <div class="flex items-center gap-4 mb-8 w-full draggable-box">
+                <div class="flex items-center justify-start gap-4 mb-8 w-full draggable-box -ml-6 -mt-4">
 
                     <!-- Khung Logo: Cho phép upload và resize -->
                     <div class="relative shrink-0 print:!resize-none print:!overflow-visible border border-transparent hover:border-gray-300 hover:border-dashed rounded p-1 transition-colors group"
-                        style="resize: both; overflow: hidden; width: 150px; height: 150px; min-width: 60px; min-height: 60px; max-width: 400px; max-height: 400px;">
+                        style="resize: both; overflow: hidden; width: 120px; height: 120px; min-width: 60px; min-height: 60px; max-width: 400px; max-height: 400px;">
 
                         <label id="logo-label" for="logo-upload"
                             class="cursor-pointer w-full h-full bg-primary text-white rounded-full flex items-center justify-center text-3xl border-4 border-white shadow-md relative overflow-hidden block">
@@ -194,17 +194,17 @@
                 </div>
 
                 <!-- Tiêu đề Tuyển sinh -->
-                <div class="relative w-fit mt-2 mb-4 flex flex-col items-center gap-3 draggable-box">
-                    <h2 class="font-black text-4xl md:text-[3rem] text-secondary uppercase italic leading-tight drop-shadow-sm w-full"
-                        contenteditable="true" style="text-align-last: justify;">
+                <div class="relative w-fit mt-2 mb-4 flex flex-col items-center text-center gap-3 draggable-box pl-4">
+                    <h2 class="font-black text-3xl md:text-[2.2rem] text-secondary uppercase italic leading-tight drop-shadow-sm w-fit"
+                        contenteditable="true">
                         KẾ HOẠCH TUYỂN SINH
                     </h2>
-                    <h3 class="font-black text-xl md:text-2xl text-primary uppercase italic drop-shadow-sm whitespace-nowrap"
+                    <h3 class="font-black text-lg md:text-xl text-primary uppercase italic drop-shadow-sm whitespace-nowrap"
                         contenteditable="true">
                         LỚP 10 TRƯỜNG THPT HIỆP HÒA SỐ 5
                     </h3>
 
-                    <div class="inline-block bg-accent text-primary font-black text-lg md:text-xl px-6 py-2 shadow-md rounded-[50px] border-2 border-white"
+                    <div class="inline-block bg-accent text-primary font-black text-lg px-6 py-2 shadow-md rounded-[50px] border-2 border-white"
                         contenteditable="true">
                         NĂM HỌC 2026 - 2027
                     </div>
@@ -215,20 +215,23 @@
         <!-- 2. SECTION: 3 CỘT -->
         <div class="grid grid-cols-3 border-b-[6px] border-primary divide-x-[3px] divide-gray-100">
             <!-- Cột 1 -->
-            <div class="p-5 flex flex-col items-center text-center bg-white draggable-box">
-                <div
-                    class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-xl mb-3 shadow-md">
-                    <i class="fa-solid fa-users"></i>
+            <div class="p-5 bg-white draggable-box">
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <div
+                        class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-md shrink-0">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h4 class="font-bold text-primary uppercase text-[13px] leading-tight" contenteditable="true">1. Chỉ Tiêu Tuyển Sinh</h4>
                 </div>
-                <h4 class="font-bold text-primary uppercase text-[13px] mb-3" contenteditable="true">1. Chỉ Tiêu Tuyển
-                    Sinh</h4>
-                <div class="text-4xl font-black text-secondary leading-none flex items-baseline gap-1">
-                    <span contenteditable="true">10</span> <span class="text-sm font-bold text-gray-600"
-                        contenteditable="true">Lớp</span>
-                </div>
-                <div class="text-3xl font-black text-primary leading-none mt-2 flex items-baseline gap-1">
-                    <span contenteditable="true">450</span> <span class="text-sm font-bold text-gray-600"
-                        contenteditable="true">Học sinh</span>
+                <div class="flex flex-col items-center justify-center gap-2 mt-4">
+                    <div class="text-4xl font-black text-secondary leading-none flex items-baseline gap-1">
+                        <span contenteditable="true">10</span> <span class="text-sm font-bold text-gray-600"
+                            contenteditable="true">Lớp</span>
+                    </div>
+                    <div class="text-3xl font-black text-primary leading-none mt-2 flex items-baseline gap-1">
+                        <span contenteditable="true">450</span> <span class="text-sm font-bold text-gray-600"
+                            contenteditable="true">Học sinh</span>
+                    </div>
                 </div>
             </div>
 
@@ -245,7 +248,7 @@
                 <ul class="text-[11px] space-y-2 list-disc pl-4 text-gray-700">
                     <li contenteditable="true">Tốt nghiệp THCS chương trình GD phổ thông hoặc GDTX trong độ tuổi quy định.</li>
                     <li contenteditable="true">Học sinh tốt nghiệp THCS tại tỉnh Bắc Ninh.</li>
-                    <li contenteditable="true">Học sinh tốt nghiệp THCS tỉnh khác có HKTT tại Bắc Ninh, hoặc có bố/mẹ HKTT tại Bắc Ninh.</li>
+                    <li contenteditable="true">Học sinh tốt nghiệp THCS tỉnh khác có HKTT tại Bắc Ninh, hoặc có bố/mẹ có HKTT tại Bắc Ninh.</li>
                 </ul>
             </div>
 
@@ -447,12 +450,12 @@
                     <h4 class="bg-primary text-white inline-block px-4 py-1.5 rounded-lg text-[12px] font-bold uppercase shadow-sm mb-3"
                         contenteditable="true">7. Chế Độ Chính Sách</h4>
                     <div class="pl-1">
-                        <p class="text-[12px] font-bold text-primary mb-2" contenteditable="true">Thực hiện theo NQ số 98/NQ-HĐND Tỉnh Bắc Ninh:</p>
+                        <p class="text-[12px] font-bold text-primary mb-2" contenteditable="true">Thực hiện theo NQ số 42/NQ-HĐND Tỉnh Bắc Ninh:</p>
                         <ul class="text-[12px] space-y-2 text-gray-700">
                             <li class="flex items-start gap-2" contenteditable="true">
                                 <i class="fa-solid fa-medal text-accent text-sm mt-0.5 shrink-0"
                                     contenteditable="false"></i>
-                                <span>Hỗ trợ học phí <strong class="text-secondary">140.000đ/tháng</strong></span>
+                                <span>Mức hỗ trợ học phí : <strong class="text-secondary">140.000đ/1 tháng</strong></span>
                             </li>
                         </ul>
                     </div>
@@ -835,7 +838,7 @@
         // 3. Chức năng Lưu Trữ Nội Dung
         function saveDraft() {
             const container = document.querySelector('.poster-container');
-            localStorage.setItem('posterDraft_THPT5_v19', container.innerHTML);
+            localStorage.setItem('posterDraft_THPT5_v27', container.innerHTML);
 
             const notif = document.getElementById('save-notif');
             notif.classList.remove('hidden');
@@ -845,7 +848,7 @@
         // 4. Khôi phục nội dung đã lưu khi trang vừa tải
         function loadDraft() {
             // Đọc Draft mới
-            const draft = localStorage.getItem('posterDraft_THPT5_v19');
+            const draft = localStorage.getItem('posterDraft_THPT5_v27');
             // Xóa rác cũ
             localStorage.removeItem('posterDraft_THCSThang');
             localStorage.removeItem('posterDraft_THPT5');
@@ -855,6 +858,14 @@
             localStorage.removeItem('posterDraft_THPT5_v16');
             localStorage.removeItem('posterDraft_THPT5_v17');
             localStorage.removeItem('posterDraft_THPT5_v18');
+            localStorage.removeItem('posterDraft_THPT5_v19');
+            localStorage.removeItem('posterDraft_THPT5_v20');
+            localStorage.removeItem('posterDraft_THPT5_v21');
+            localStorage.removeItem('posterDraft_THPT5_v22');
+            localStorage.removeItem('posterDraft_THPT5_v23');
+            localStorage.removeItem('posterDraft_THPT5_v24');
+            localStorage.removeItem('posterDraft_THPT5_v25');
+            localStorage.removeItem('posterDraft_THPT5_v26');
             localStorage.removeItem('posterDraft_THPT5_v7');
             localStorage.removeItem('posterDraft_THPT5_v8');
             localStorage.removeItem('posterDraft_THPT5_v9');
@@ -871,7 +882,7 @@
         // 5. Xóa bản lưu (Reset)
         function clearDraft() {
             if (confirm("Bạn có chắc chắn muốn xóa bản lưu hiện tại và khôi phục về mặc định gốc?")) {
-                localStorage.removeItem('posterDraft_THPT5_v19');
+                localStorage.removeItem('posterDraft_THPT5_v27');
                 location.reload();
             }
         }
@@ -923,11 +934,16 @@
         // Kiểm tra chuột có nằm ở viền phần tử hay không
         function isNearEdge(e, element) {
             const rect = element.getBoundingClientRect();
+            // Đảm bảo vùng viền tối đa là 15px, nhưng không được vượt quá 20% kích thước phần tử
+            // để bảo đảm luôn có khoảng trống ở giữa để nhấp chuột sửa chữ (đối với box nhỏ)
+            const edgeX = Math.min(EDGE_SIZE, rect.width * 0.2);
+            const edgeY = Math.min(EDGE_SIZE, rect.height * 0.2);
+
             return (
-                e.clientX < rect.left + EDGE_SIZE ||
-                e.clientX > rect.right - EDGE_SIZE ||
-                e.clientY < rect.top + EDGE_SIZE ||
-                e.clientY > rect.bottom - EDGE_SIZE
+                e.clientX < rect.left + edgeX ||
+                e.clientX > rect.right - edgeX ||
+                e.clientY < rect.top + edgeY ||
+                e.clientY > rect.bottom - edgeY
             );
         }
 
